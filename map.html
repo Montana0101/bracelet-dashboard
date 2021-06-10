@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>地图</title>
+    <script type="text/javascript"
+            src="https://api.map.baidu.com/api?v=3.0&ak=E4pKWf3KfZol5F2knnH3jVn1muFcyxpz"></script>
+    <script type="text/javascript" src="resources/scripts/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js"></script>
+    <script type="text/javascript"
+            src="js/MarkerClusterer_min.js"></script>
+</head>
+<body style="margin: 0px">
+<div id="container" style="width: 1132px;height: 662px; margin: 0px "></div>
+</body>
+<script type="text/javascript" src="js/HashMap.js"></script>
+<script type="text/javascript" src="js/lsbridge.min.js"></script>
+<script inline="javascript" note="百度地图">
+    let map = new BMap.Map("container", {enableMapClick: false});
+    let pointInit = new BMap.Point(121.48789949, 31.24916171);
+    map.centerAndZoom(pointInit, 14);
+    map.enableScrollWheelZoom(true);
+    map.setMapStyleV2({
+        styleId: '24398dd876cdeed2af6ab01ba34c751e'
+    });
+    let top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_BOTTOM_LEFT});// 左上角，添加比例尺
+    let top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
+    let mapTypeControl = new BMap.MapTypeControl({mapTypes: [BMAP_NORMAL_MAP, BMAP_HYBRID_MAP]});
+    map.addControl(top_left_control);
+    map.addControl(top_left_navigation);
+    map.addControl(mapTypeControl);
+    let zoom = sessionStorage.getItem("zoom");
+    let center_lat = sessionStorage.getItem("center_lat");
+    let center_lng = sessionStorage.getItem("center_lng");
+    let map_type = sessionStorage.getItem("map_type");
+    if (center_lat != undefined && center_lng != undefined) {
+        pointInit = new BMap.Point(center_lng, center_lat);
+    } else {
+        pointInit = new BMap.Point(121.48789949, 31.24916171);
+    }
+    if (zoom != undefined) {
+        map.centerAndZoom(pointInit, zoom);
+    } else {
+        map.centerAndZoom(pointInit, 12);
+    }
+    if (map_type != undefined) {
+        if (map_type == "混合") {
+            map.setMapType(BMAP_HYBRID_MAP)
+        } else if (map_type == "地图") {
+            map.setMapType(BMAP_NORMAL_MAP)
+        }
+    }
+    map.addEventListener('zoomend', function (type, target) {
+        sessionStorage.setItem("zoom", map.getZoom())
+        let center = map.getCenter();
+        sessionStorage.setItem("center_lat", center.lat)
+        sessionStorage.setItem("center_lng", center.lng)
+    });
+    map.addEventListener('maptypechange', function (type, target) {
+        let name = map.getMapType().getName();
+        sessionStorage.setItem("map_type", name)
+    });
+    setTimeout(function () {
+        $(".BMap_scaleTxt").css("color", "#FFFFFF")
+    }, 3000)
+</script>
+
+<script>
+    // address: "上海市 宝山区 沪太公路辅路 靠近美兰大厦"
+    // bloodHigh: 117
+    // bloodLow: 77
+    // braceletId: "863659042389816"
+    // distance: 0
+    // heartrate: 77
+    // latitude: "31.390274"
+    // longitude: "121.36573"
+    // name: "蒋钰"
+    // power: 30
+    // stepCount: 408
+    // updateTime: "2021-06-02 17:49:02"
+    let braceletMap = new HashMap();
+    let isFirst = true;
+    lsbridge.subscribe('bracelet_datas', function (data) {
+        data.forEach(function (bracelet) {
+            let braceletId = bracelet.braceletId;
+            var point = new BMap.Point(bracelet.longitude, bracelet.latitude);
+            if (braceletMap.containsKey(braceletId)) {
+                braceletMap.get(braceletId).point = point;
+                braceletMap.get(braceletId).bracelet = bracelet;
+                braceletMap.get(braceletId).marker.setPosition(point)
+                braceletMap.get(braceletId).marker.getLabel().setPosition(point)
+                braceletMap.get(braceletId).marker.getLabel().setContent(bracelet.name + "：" + bracelet.address)
+            } else {
+                let myIcon = new BMap.Icon("images/point.png", new BMap.Size(32, 32));
+                let marker = new BMap.Marker(point, {
+                    icon: myIcon
+                });
+                var opts = {
+                    position: point, // 指定文本标注所在的地理位置
+                    offset: new BMap.Size(29, 4) // 设置文本偏移量
+                };
+                var label = new BMap.Label(bracelet.name + "：" + bracelet.address, opts);
+                label.setStyle({
+                    color: 'blue',
+                    borderRadius: '0px',
+                    borderColor: '#ccc',
+                    padding: '0px',
+                    fontSize: '5px',
+                    height: '20px',
+                    lineHeight: '20px',
+                    fontFamily: '微软雅黑',
+                    left: 300
+                });
+                marker.setLabel(label)
+                braceletMap.put(braceletId, {bracelet: bracelet, point: point, marker: marker, label: label})
+            }
+            map.addOverlay(braceletMap.get(braceletId).marker);
+        })
+        if (isFirst) {
+            isFirst = false;
+            setViewport()
+        }
+    });
+    lsbridge.subscribe('select_bracelet', function (data) {
+        console.info(data)
+        map.panTo(braceletMap.get(data).point)
+    })
+
+    function setViewport() {
+        let pointArray = new Array();
+        var markers = new Array();
+        braceletMap.values().forEach(function (bracelet) {
+            pointArray.push(bracelet.point)
+            markers.push(bracelet.marker);
+            bracelet.marker.setLabel(bracelet.label)
+        })
+        map.setViewport(pointArray);
+        var markerClusterer = new BMapLib.MarkerClusterer(map, {markers: markers});
+    }
+</script>
+</html>
