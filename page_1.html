@@ -7,6 +7,7 @@
     <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
     <link href="data/styles.css" type="text/css" rel="stylesheet"/>
     <link href="files/page_1/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/echarts.min.js"></script>
     <script src="resources/scripts/jquery-3.2.1.min.js"></script>
     <script src="resources/scripts/axure/axQuery.js"></script>
     <script src="resources/scripts/axure/globals.js"></script>
@@ -40,6 +41,7 @@
     <script src="data/document.js"></script>
     <script src="files/page_1/data.js"></script>
     <script src="js/index_kb.js"></script>
+
     <link href="style/index_kb.css" type="text/css" rel="stylesheet"/>
     <script type="text/javascript">
         $axure.utils.getTransparentGifPath = function () {
@@ -241,7 +243,7 @@
     </div>
 
     <!-- Unnamed (矩形) -->
-    <div id="u23" class="ax_default box_1" style="border:1px solid red;margin-bottom:20px;">
+    <div id="u23" class="ax_default box_1" style="margin-bottom:20px;">
         <div id="u23_div" class="" style="margin-bottom:20px"></div>
         <div id="u23_text" class="text " style="display:none; visibility: hidden;">
             <p></p>
@@ -360,7 +362,7 @@
 
     <!-- Unnamed (矩形) -->
     <div id="u38" class="ax_default box_1" style="position:relative;display:flex;">
-        <div id='u38_container' class="text" style='flex:1;height:100%;border:1px solid red'>
+        <div id='u38_container' class="text" style='flex:1;height:100%;'>
         </div>
         <div style="width: 100px;float:right;color:white;position:absolute;right:0;
           height:100%;display:flex;flex-direction:column;font-size:40px;">
@@ -372,10 +374,14 @@
 
     <!-- Unnamed (矩形) -->
     <div id="u39" class="ax_default box_1">
-        <div id='u39_container' class="text" style='flex:1;height:100%;border:1px solid red'>
+        <div id='echarts_container' class="text" style='flex:1;height:100%;'>
         </div>
     </div>
+
+    <!-- 提示框 -->
+    <div id='tooltip'></div>
 </div>
 <script src="resources/scripts/axure/ios.js"></script>
+<script src="js/charts.js"></script>
 </body>
 </html>

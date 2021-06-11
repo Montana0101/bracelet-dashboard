@@ -16,8 +16,8 @@ window.onload = function () {
 
     get_all_infos() // 通知信息
     get_all_bracelet_list() // 手环列表
-    setInterval(`get_all_bracelet_list()`, 30000); // 手环列表--定时请求
-
+    setInterval(`get_all_bracelet_list()`, 15000); // 手环列表--定时请求
+    setInterval(`get_all_infos()`, 15000); // 通知信息--定时请求
     setInterval("update_time()", 1000);
     init_map()
 
@@ -59,8 +59,6 @@ window.onload = function () {
     $('#u24_input').bind("input propertychange", function () {
         barcelet_search_query = $('#u24_input').val();
         get_all_bracelet_list();
-        console.log('打印下数据', barcelet_search_query)
-
     })
 
     // 通知信息窗口
@@ -103,7 +101,7 @@ window.onload = function () {
             bracelet_pageNo -= 1
             get_all_bracelet_list()
         } else {
-            console.log('没有上一页咯')
+            showTooltip('没有上一页咯')
         }
 
     })
@@ -114,7 +112,7 @@ window.onload = function () {
             bracelet_pageNo += 1
             get_all_bracelet_list()
         } else {
-            console.log('没有下一页咯')
+            showTooltip('没有下一页咯')
         }
 
     })
@@ -125,19 +123,18 @@ window.onload = function () {
             notice_pageNo -= 1
             get_all_infos()
         } else {
-            console.log('没有上一页咯')
+            showTooltip('没有上一页咯')
         }
 
     })
 
     // 通知下一页
     $('#next_notice').click(function () {
-        console.log('打印下数据',notice_page_total,notice_pageNo)
         if (notice_page_total > notice_pageNo) {
             notice_pageNo += 1
             get_all_infos()
         } else {
-            console.log('没有下一页咯')
+            showTooltip('没有下一页咯')
         }
 
     })
@@ -146,7 +143,6 @@ let searchContent = "";
 
 function kb_status_data() {
     $.get("https://www.bdvmp.com/bracelet-wechat-service/api/kb/get_status", function (data) {
-        // console.log('获取看板状态数据', data)
         if (data.code == 2000) {
             $("#u5_text").text(data.result.wechartUser)
             $("#u8_text").text(data.result.bracelet)
@@ -174,9 +170,7 @@ function init_bracelet_list_table(data) {
 
 function init_infos_list_table(data) {
     $("#notice-table").empty()
-    console.log('打印下Infossssssssss~~~',data)
     data.forEach(function (item) {
-        console.log('大图标选啊',item.body)
         let table_row = '  <div class="notice-table-row">\n' +
             '        <div class="notice-table-column1">' + item.dataTime + '</div>\n' +
             '        <div class="notice-table-column2">' + item.body + '</div>\n' +
@@ -210,14 +204,19 @@ function get_all_infos() {
         , function (data) {
             if (data.code == 2000) {
                 notice_page_total = data.result.totalPage
-                console.log('通知信息接口~~~~~', data.result)
                 init_infos_list_table(data.result.data)
             }
         })
 }
 
-function get_inform_message() {
-
+// 显示提示框
+const showTooltip = (text) => {
+    $('#tooltip').text(text)
+    $('#tooltip').css('z-index',777)
+    setTimeout(()=>{
+        $('#tooltip').css('z-index',-777)
+        $('#tooltip').text('')
+    },1500)
 }
 
 function reload_page() {
